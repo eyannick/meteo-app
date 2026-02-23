@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <!-- Métadonnées de la page -->
+        <title>Météo – Application en temps réel</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="Application de météo en temps réel – consultez la météo de n'importe quelle ville." />
+        <meta name="author" content="Yannick ERDMANN" />
+
+        <!-- Bootstrap 5.3.8 – CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+        <!-- Google Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+        <!-- Bootstrap Icons 1.11.3-->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+
+        <!-- Feuille de styles locale -->
+        <link rel="stylesheet" href="assets/css/styles.css" />
+
+        <!-- Favicon -->
+        <link rel="icon" href="assets/img/icons/favicon.ico" sizes="any" />
+        <link rel="icon" href="assets/img/icons/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="assets/img/icons/apple-touch-icon.png" />
+    </head>
+
+    <body>
+
+        <!-- Zone principale : affichage des données météo-->
+        <main class="weather-wrap d-flex align-items-center justify-content-center p-3">
+
+            <section class="glass-card container" style="max-width: 880px" aria-label="Carte météo">
+                <div class="row g-0 align-items-center p-4 p-md-5">
+                    <div class="col-12 text-center">
+
+                        <!-- Titre de l'application -->
+                        <h1 class="title display-3 mb-2">Météo</h1>
+
+                        <!-- Chip : ville courante-->
+                        <div class="d-flex justify-content-center align-items-center gap-2 mb-3">
+                            <div class="chip" role="status" aria-live="polite" aria-label="Ville affichée">
+                                <i class="bi bi-geo-alt" aria-hidden="true"></i>
+                                <span id="cityLabel" class="city">Chargement…</span>
+                            </div>
+                        </div>
+
+                        <!-- Icône météo + température -->
+                        <div class="d-flex justify-content-center align-items-center gap-3 mb-2">
+                            <img id="weatherIconImg" alt="" height="80" />
+                            <div class="temp" id="tempLabel" aria-label="Température actuelle"></div>
+                        </div>
+
+                        <!-- Températures min / max -->
+                        <div class="meta mb-2" id="tempMinMaxLabel" aria-label="Températures minimale et maximale"></div>
+
+                        <!-- Métadonnées : description, humidité, vent -->
+                        <div class="meta mb-4" id="metaLabel" aria-label="Conditions météorologiques"></div>
+
+                        <!-- Boutons d'action-->
+                        <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+
+                            <!-- data-bs-toggle / data-bs-target : attributs Bootstrap qui ouvrent la modale #cityModal sans JavaScript -->
+                            <button id="changeCityBtn" class="btn btn-light btn-weather" type="button" data-bs-toggle="modal" data-bs-target="#cityModal" aria-haspopup="dialog">
+                                <i class="bi bi-search me-2" aria-hidden="true"></i>Changer de ville
+                            </button>
+
+                            <button id="refreshBtn" class="btn btn-outline-light btn-weather" type="button" aria-label="Actualiser les données météo">
+                                <i class="bi bi-arrow-clockwise me-2" aria-hidden="true"></i>Actualiser
+                            </button>
+
+                        </div>
+
+                        <!-- Skeleton loader -->
+                        <div class="mt-4 d-none" id="loadingRow" aria-hidden="true">
+                            <div class="mx-auto" style="max-width: 360px">
+                                <div class="skeleton" style="height: 22px"></div>
+                                <div class="skeleton mt-2" style="height: 64px"></div>
+                                <div class="skeleton mt-2" style="height: 18px"></div>
+                            </div>
+                        </div>
+
+                        <!-- Zone d'erreur -->
+                        <div class="alert alert-danger mt-4 d-none" id="errorBox" role="alert" aria-live="assertive"></div>
+
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Section : Grille des villes prédéfinies -->
+        <section class="cities-section container" aria-labelledby="citiesSectionTitle">
+
+            <!-- En-tête de section avec séparateurs visuels -->
+            <div class="cities-section-header">
+                <span class="cities-section-line" aria-hidden="true"></span>
+                <h2 class="cities-section-title" id="citiesSectionTitle">
+                    <i class="bi bi-globe2 me-2" aria-hidden="true"></i>Météo dans le monde
+                </h2>
+                <span class="cities-section-line" aria-hidden="true"></span>
+            </div>
+
+            <!-- Grille des cards -->
+            <div id="cityCardsGrid" class="cities-grid" role="list" aria-label="Liste des villes prédéfinies"></div>
+
+        </section>
+
+        <!-- Modale : changement de ville -->
+        <div class="modal fade" id="cityModal" tabindex="-1" role="dialog" aria-labelledby="cityModalLabel" aria-modal="true" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0" style="border-radius: 1.25rem">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cityModalLabel">Changer de ville</h5>
+                        <!-- data-bs-dismiss="modal" : ferme la modale via Bootstrap -->
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <label for="cityInput" class="form-label fw-semibold">Ville</label>
+
+                        <input id="cityInput" class="form-control form-control-lg" type="text" placeholder="Ex: Paris, Lyon, Marseille…" autocomplete="off" spellcheck="false" aria-describedby="cityInputHint" />
+                        <div id="cityInputHint" class="form-text">
+                            Astuce : vous pouvez saisir <strong>Ville, CODE_PAYS</strong>
+                            pour plus de précision (ex: <em>Paris, FR</em> ou <em>Bruxelles, BE</em>).
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-primary" id="saveCityBtn">Valider</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Bouton "Retour en haut de page"-->
+        <button id="backToTopBtn" class="btt-btn btt-hidden" type="button" aria-label="Retour en haut de la page" title="Retour en haut">
+            <i class="bi bi-arrow-up" aria-hidden="true"></i>
+        </button>
+
+        <!-- Bootstrap 5.3.8 – Bundle JS (Popper inclus) -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        
+        <!-- Fichier de configuration permettant de gérer la clé API OpenWeatherMap -->
+        <script src="assets/js/config.js"></script>
+        <!-- Script local – chargé après Bootstrap pour en dépendre -->
+        <script src="assets/js/scripts.js"></script>
+
+    </body>
+</html>

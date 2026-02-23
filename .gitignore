@@ -1,0 +1,14 @@
+# Clé API – ne jamais commiter
+assets/js/config.js
+
+# Fichiers système macOS
+.DS_Store
+
+# Fichiers système Windows
+Thumbs.db
+desktop.ini
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp

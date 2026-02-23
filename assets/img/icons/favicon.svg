@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <!-- Fond dégradé bleu ciel cohérent avec l'app -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#bfe8ff"/>
+      <stop offset="100%" style="stop-color:#4fb2ff"/>
+    </linearGradient>
+    <!-- Dégradé soleil : jaune chaud → orangé -->
+    <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ffe066"/>
+      <stop offset="100%" style="stop-color:#ffb300"/>
+    </radialGradient>
+    <!-- Dégradé nuage : blanc pur → gris très clair -->
+    <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#dff0fa"/>
+    </linearGradient>
+    <!-- Ombre portée douce sur le nuage -->
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="rgba(0,80,160,0.18)"/>
+    </filter>
+  </defs>
+
+  <!-- Fond arrondi bleu ciel -->
+  <rect width="64" height="64" rx="14" fill="url(#bgGrad)"/>
+
+  <!-- Rayons du soleil (8 rayons, rotatifs autour du centre du soleil) -->
+  <g transform="translate(24, 22)" stroke="#ffb300" stroke-width="2.2" stroke-linecap="round" opacity="0.9">
+    <line x1="0" y1="-12" x2="0" y2="-8.5"/>
+    <line x1="8.5" y1="-8.5" x2="6" y2="-6"/>
+    <line x1="12" y1="0" x2="8.5" y2="0"/>
+    <line x1="8.5" y1="8.5" x2="6" y2="6"/>
+    <line x1="0" y1="12" x2="0" y2="8.5"/>
+    <line x1="-8.5" y1="8.5" x2="-6" y2="6"/>
+    <line x1="-12" y1="0" x2="-8.5" y2="0"/>
+    <line x1="-8.5" y1="-8.5" x2="-6" y2="-6"/>
+  </g>
+
+  <!-- Corps du soleil -->
+  <circle cx="24" cy="22" r="7" fill="url(#sunGrad)"/>
+
+  <!-- Nuage principal (partiellement devant le soleil) -->
+  <g filter="url(#shadow)">
+    <!-- Bosse droite (grande) -->
+    <circle cx="38" cy="36" r="9" fill="url(#cloudGrad)"/>
+    <!-- Bosse gauche (moyenne) -->
+    <circle cx="28" cy="38" r="7" fill="url(#cloudGrad)"/>
+    <!-- Bosse centrale haute (petite) -->
+    <circle cx="34" cy="33" r="6.5" fill="url(#cloudGrad)"/>
+    <!-- Corps bas du nuage (rectangle arrondi pour remplir) -->
+    <rect x="21" y="38" width="26" height="9" rx="4.5" fill="url(#cloudGrad)"/>
+  </g>
+</svg>

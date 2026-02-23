@@ -1,0 +1,587 @@
+/* ==========================================================================
+   styles.css – Application Météo
+   Auteur  : Yannick ERDMANN
+   Date    : 23/02/2026
+   Description : Feuille de styles principale de l'application météo.
+                 Surcharge partielle de Bootstrap 5 via les custom properties
+                 et ajout des composants spécifiques à l'application
+                 (glassmorphism, skeleton loader, chip, boutons météo…).
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. Design Tokens (CSS Custom Properties)
+   --------------------------------------------------------------------------
+   Centralisation de toutes les valeurs réutilisables.
+   On écrase les variables Bootstrap (--bs-*) pour une cohérence globale
+   sans avoir à surcharger chaque composant individuellement.
+   ========================================================================== */
+
+:root {
+  /* --- Typographie --- */
+  --bs-font-sans-serif : "Roboto", system-ui, -apple-system, "Segoe UI",
+                         "Helvetica Neue", Arial, "Noto Sans",
+                         "Liberation Sans", sans-serif,
+                         "Apple Color Emoji", "Segoe UI Emoji",
+                         "Segoe UI Symbol", "Noto Color Emoji";
+  --bs-font-monospace  : "Roboto Mono", SFMono-Regular, Menlo, Monaco,
+                         Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* --- Palette Bootstrap (tokens sémantiques) --- */
+  --bs-blue    : #0d6efd;
+  --bs-indigo  : #6610f2;
+  --bs-purple  : #6f42c1;
+  --bs-pink    : #d63384;
+  --bs-red     : #dc3545;
+  --bs-orange  : #fd7e14;
+  --bs-yellow  : #ffc107;
+  --bs-green   : #198754;
+  --bs-teal    : #20c997;
+  --bs-cyan    : #0dcaf0;
+
+  /* Neutres */
+  --bs-white     : #ffffff;
+  --bs-black     : #000000;
+  --bs-gray      : #9e9e9e;
+  --bs-gray-dark : #424242;
+
+  /* Rôles sémantiques */
+  --bs-primary   : #6200ea;
+  --bs-secondary : #9c27b0;
+  --bs-success   : #2e7d32;
+  --bs-info      : #26a69a;
+  --bs-warning   : #ffb300;
+  --bs-danger    : #d32f2f;
+  --bs-light     : #f5f5f5;
+  --bs-dark      : #212121;
+
+  /* Dégradé utilitaire Bootstrap */
+  --bs-gradient : linear-gradient(
+                    180deg,
+                    rgba(255, 255, 255, 0.15),
+                    rgba(255, 255, 255, 0)
+                  );
+
+  /* --- Couleurs personnalisées – Application météo --- */
+
+  /* Fond : dégradé bleu ciel */
+  --bg-a : #bfe8ff;  /* Bleu clair (haut du dégradé) */
+  --bg-b : #4fb2ff;  /* Bleu plus soutenu (bas du dégradé) */
+
+  /* Glassmorphism : fond et bordure semi-transparents de la carte */
+  --glass        : rgba(255, 255, 255, 0.25);
+  --glass-border : rgba(255, 255, 255, 0.35);
+
+  /* Texte principal et texte atténué sur fond clair */
+  --text  : rgba(0, 0, 0, 0.78);
+  --muted : rgba(0, 0, 0, 0.55);
+}
+
+
+/* ==========================================================================
+   2. Reset / Global
+   --------------------------------------------------------------------------
+   Normalisation des comportements de box-model et des styles de base du body.
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box; /* Modèle de boîte cohérent sur tous les éléments */
+}
+
+html,
+body {
+  margin      : 0;
+  font-family : var(--bs-font-sans-serif);
+  font-size   : 1rem;    /* 16 px par défaut navigateur */
+  font-weight : 400;
+  line-height : 1.5;
+  color       : var(--text);
+
+  /*
+   * Fond en dégradé multi-couches :
+   *   1. Dégradé radial (tache lumineuse en haut à gauche) → profondeur atmosphérique
+   *   2. Dégradé linéaire diagonal (--bg-a → --bg-b) → fond de ciel
+   */
+  background :
+    radial-gradient(1200px 700px at 20% 10%, #e7f6ff 0%, transparent 55%),
+    linear-gradient(135deg, var(--bg-a), var(--bg-b));
+
+  /* Empêche le redimensionnement automatique du texte sur iOS en mode paysage */
+  -webkit-text-size-adjust    : 100%;
+
+  /* Supprime le flash bleu au tap sur les éléments interactifs (mobile) */
+  -webkit-tap-highlight-color : rgba(0, 0, 0, 0);
+}
+
+
+/* ==========================================================================
+   3. Layout – Conteneur principal
+   ========================================================================== */
+
+/**
+ * Classe appliquée sur <main>.
+ * min-height: 60vh garantit que la page occupe toujours une majorité de la hauteur
+ * complète de la fenêtre, même avec peu de contenu.
+ */
+.weather-wrap {
+  min-height: 60vh;
+}
+
+
+/* ==========================================================================
+   4. Carte glassmorphism
+   --------------------------------------------------------------------------
+   Le glassmorphism crée un effet de verre dépoli sur la carte météo :
+   fond semi-transparent + flou d'arrière-plan (backdrop-filter).
+
+   Compatibilité :
+     - backdrop-filter : supporté par tous les navigateurs modernes.
+     - -webkit-backdrop-filter : nécessaire pour Safari (tous préfixes WebKit).
+   ========================================================================== */
+
+.glass-card {
+  background            : var(--glass);
+  border                : 1px solid var(--glass-border);
+  backdrop-filter       : blur(14px);
+  -webkit-backdrop-filter : blur(14px); /* Safari */
+  border-radius         : 1.5rem;
+  box-shadow            : 0 18px 50px rgba(0, 0, 0, 0.08);
+}
+
+
+/* ==========================================================================
+   5. Typographie spécifique à l'application
+   ========================================================================== */
+
+/** Titre principal "Météo" */
+.title {
+  font-weight    : 300;       /* Roboto Light pour une apparence aérée */
+  letter-spacing : 0.5px;
+}
+
+/** Nom de la ville dans le chip */
+.city {
+  color          : var(--muted);
+  font-weight    : 500;
+  letter-spacing : 0.3px;
+}
+
+/**
+ * Affichage de la température actuelle.
+ * Taille volontairement grande (2.5rem) et fine (font-weight: 300)
+ * pour un rendu "chiffre météo" lisible d'un coup d'œil.
+ */
+.temp {
+  font-weight : 300;
+  font-size   : 2.5rem;
+  line-height : 1;
+}
+
+/** Texte secondaire : min/max, description, humidité, vent */
+.meta {
+  color     : var(--muted);
+  font-size : 0.95rem;
+}
+
+
+/* ==========================================================================
+   6. Boutons météo
+   ========================================================================== */
+
+/**
+ * Style commun aux deux boutons d'action (Changer de ville / Actualiser).
+ * Uppercase + letter-spacing : lisibilité des libellés courts.
+ */
+.btn-weather {
+  padding        : 1rem 1.5rem;
+  font-weight    : 700;
+  letter-spacing : 0.6px;
+  text-transform : uppercase;
+  border-radius  : 0.9rem;
+  transition     : background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/** Survol : teinte légèrement plus soutenue, texte foncé pour le contraste */
+.btn-weather:hover {
+  background-color : var(--bg-b);
+  color            : var(--text);
+  border-color     : var(--bg-b);
+}
+
+#refreshBtn {
+  background-color : var(--bg-b);
+  border-color     : var(--bg-b);
+  color            : #fff;
+}
+
+#refreshBtn:hover {
+  background-color : #3a9fe8;
+  border-color     : #3a9fe8;
+  color            : #fff;
+}
+
+
+/* ==========================================================================
+   7. Chip – Badge de localisation
+   --------------------------------------------------------------------------
+   Petit badge arrondi affichant l'icône de localisation et le nom de la ville.
+   ========================================================================== */
+
+.chip {
+  display      : inline-flex;
+  align-items  : center;
+  gap          : 0.5rem;
+  padding      : 0.35rem 0.65rem;
+  border-radius: 999px;             /* Bord entièrement arrondi (pill) */
+  background   : rgba(255, 255, 255, 0.35);
+  border       : 1px solid rgba(255, 255, 255, 0.4);
+  color        : var(--muted);
+  font-size    : 0.9rem;
+}
+
+
+/* ==========================================================================
+   8. Skeleton Loader
+   --------------------------------------------------------------------------
+   Animation de chargement qui imite la forme des éléments à afficher
+   (placeholder animé) pour éviter un écran vide pendant la requête API.
+
+   Technique : un pseudo-élément ::after balaye le conteneur de gauche
+   à droite via une animation CSS (shimmer), créant un reflet lumineux.
+   ========================================================================== */
+
+.skeleton {
+  position      : relative;
+  overflow      : hidden;         /* Masque le ::after hors des bords */
+  border-radius : 0.75rem;
+  background    : rgba(255, 255, 255, 0.25);
+}
+
+/**
+ * Reflet animé du skeleton.
+ * translateX(-100%) → translateX(100%) : balayage de gauche à droite.
+ */
+.skeleton::after {
+  content    : "";
+  position   : absolute;
+  inset      : 0;                 /* Couvre tout le parent (équivalent top/right/bottom/left: 0) */
+  transform  : translateX(-100%);
+  background : linear-gradient(
+                 90deg,
+                 transparent,
+                 rgba(255, 255, 255, 0.55),
+                 transparent
+               );
+  animation  : shimmer 1.2s infinite;
+}
+
+
+/* ==========================================================================
+   9. Section "Météo dans le monde" – Grille de cards
+   --------------------------------------------------------------------------
+   Section placée sous la carte météo principale.
+   Affiche une grille responsive de cards, une par ville prédéfinie.
+   ========================================================================== */
+
+/**
+ * Conteneur de section.
+ * max-width aligné sur la carte principale (880px) pour une cohérence visuelle.
+ * padding-bottom généreux pour que le dernier rang de cards ne soit pas
+ * collé au bas de la page.
+ */
+.cities-section {
+  max-width    : 1200px;
+  margin       : 0 auto;
+  padding      : 2rem 1rem 4rem;
+}
+
+
+/* --------------------------------------------------------------------------
+   En-tête de section : ligne + titre + ligne
+   --------------------------------------------------------------------------
+   Technique du "ruled title" : deux lignes horizontales de chaque côté du
+   titre, créées avec des pseudo-éléments via flexbox.
+   -------------------------------------------------------------------------- */
+
+.cities-section-header {
+  display     : flex;
+  align-items : center;
+  gap         : 1rem;
+  margin-bottom : 2rem;
+}
+
+/** Lignes horizontales de séparation */
+.cities-section-line {
+  flex       : 1;
+  height     : 1px;
+  background : rgba(255, 255, 255, 0.4);
+}
+
+.cities-section-title {
+  font-size      : 1rem;
+  font-weight    : 600;
+  color          : rgba(255, 255, 255, 0.85);
+  text-transform : uppercase;
+  letter-spacing : 0.12em;
+  white-space    : nowrap;
+  margin         : 0;
+}
+
+
+/* --------------------------------------------------------------------------
+   Grille CSS auto-fill
+   --------------------------------------------------------------------------
+   auto-fill + minmax(160px, 1fr) : le navigateur calcule automatiquement
+   le nombre de colonnes en fonction de la largeur disponible.
+   Chaque card fait au minimum 160px et peut s'étirer jusqu'à 1fr.
+   Résultat : 2 colonnes sur mobile, 4 sur tablette, 6-7 sur desktop.
+   -------------------------------------------------------------------------- */
+
+.cities-grid {
+  display               : grid;
+  grid-template-columns : repeat(auto-fill, minmax(160px, 1fr));
+  gap                   : 1rem;
+}
+
+
+/* --------------------------------------------------------------------------
+   Card individuelle
+   --------------------------------------------------------------------------
+   Hérite du style glassmorphism de la carte principale
+   (.glass-card) mais en version compacte.
+
+   - display: flex + flex-direction: column : empile les éléments verticalement
+     et permet d'aligner la description en bas via margin-top: auto.
+   - cursor: pointer : signale l'interactivité au survol.
+   - border: none : réinitialise le style de bouton natif du navigateur.
+   -------------------------------------------------------------------------- */
+
+.city-card {
+  /* Héritage du style glassmorphism */
+  background            : var(--glass);
+  border                : 1px solid var(--glass-border);
+  backdrop-filter       : blur(14px);
+  -webkit-backdrop-filter : blur(14px);
+  border-radius         : 1.1rem;
+  box-shadow            : 0 6px 20px rgba(0, 0, 0, 0.06);
+
+  /* Mise en page interne */
+  display               : flex;
+  flex-direction        : column;
+  align-items           : center;
+  text-align            : center;
+  padding               : 1.2rem 0.8rem 1rem;
+  gap                   : 0.25rem;
+
+  /* Interactivité */
+  cursor                : pointer;
+  transition            : transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+
+  /* Réinitialisation des styles de <button> */
+  color                 : var(--text);
+  width                 : 100%;
+}
+
+/** Survol : légère élévation + ombre plus prononcée */
+.city-card:hover {
+  transform  : translateY(-4px);
+  box-shadow : 0 14px 32px rgba(0, 0, 0, 0.12);
+}
+
+/** Focus clavier : contour visible pour l'accessibilité */
+.city-card:focus-visible {
+  outline        : 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset : 3px;
+}
+
+/**
+ * État actif : ville sélectionnée comme ville principale.
+ * Fond plus opaque + bordure blanche prononcée pour distinguer visuellement
+ * la card active des autres.
+ */
+.city-card.card-active {
+  background   : rgba(255, 255, 255, 0.45);
+  border-color : rgba(255, 255, 255, 0.75);
+  box-shadow   : 0 8px 28px rgba(0, 0, 0, 0.1), 0 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+.city-card.card-active:hover {
+  transform : translateY(-3px); /* Légèrement moins d'élévation pour la card active */
+}
+
+
+/* --------------------------------------------------------------------------
+   Éléments internes de la card
+   -------------------------------------------------------------------------- */
+
+/** Emoji du drapeau */
+.card-city-flag {
+  font-size   : 1.4rem;
+  line-height : 1;
+  margin-bottom : 0.15rem;
+}
+
+/** Nom de la ville */
+.card-city-name {
+  font-size   : 0.8rem;
+  font-weight : 600;
+  color       : var(--muted);
+  text-transform : uppercase;
+  letter-spacing : 0.06em;
+  margin-bottom  : 0.35rem;
+  /* Empêche le débordement sur les noms longs (ex: "Stiring-Wendel") */
+  overflow       : hidden;
+  text-overflow  : ellipsis;
+  white-space    : nowrap;
+  width          : 100%;
+}
+
+/** Icône météo */
+.card-city-icon {
+  /* Icône légèrement agrandie par rapport au rendu natif (52px) via CSS */
+  width  : 52px;
+  height : 52px;
+  object-fit : contain;
+}
+
+/** Température principale */
+.card-city-temp {
+  font-size   : 1.6rem;
+  font-weight : 300;
+  line-height : 1;
+  color       : var(--text);
+}
+
+/** Températures min / max */
+.card-city-minmax {
+  font-size : 0.72rem;
+  color     : var(--muted);
+  margin-top: 0.2rem;
+}
+
+/** Description courte (ex: "Nuageux") */
+.card-city-desc {
+  font-size  : 0.78rem;
+  color      : var(--muted);
+  margin-top : auto; /* Pousse la description en bas de la card */
+  padding-top: 0.4rem;
+}
+
+/**
+ * État d'erreur sur une card (ville indisponible).
+ * Affiché lorsque la requête API échoue pour une ville donnée.
+ */
+.card-city-error {
+  font-size  : 0.78rem;
+  color      : rgba(180, 60, 60, 0.85);
+  margin-top : 0.5rem;
+  display    : flex;
+  flex-direction : column;
+  align-items    : center;
+  gap            : 0.3rem;
+}
+
+/**
+ * Zone skeleton spécifique aux cards.
+ * Utilisée uniquement le temps que les données API arrivent.
+ */
+.card-city-skeleton {
+  width      : 100%;
+  margin-top : 0.4rem;
+}
+
+
+
+/* ==========================================================================
+   10. Bouton "Retour en haut de page" (Back-to-top)
+   --------------------------------------------------------------------------
+   Bouton fixe en bas à droite de l'écran.
+   Apparaît après 300px de défilement (classe .btt-hidden retirée par le JS).
+   Design cohérent avec le glassmorphism de l'application.
+   ========================================================================== */
+
+/**
+ * Bouton fixe, positionné dans le coin inférieur droit.
+ * z-index élevé pour passer au-dessus de tous les éléments de la page.
+ */
+.btt-btn {
+  position      : fixed;
+  bottom        : 2rem;
+  right         : 2rem;
+  z-index       : 1050;   /* Au-dessus des cards et du contenu, sous les modales (1055) */
+
+  /* Taille et forme */
+  width         : 48px;
+  height        : 48px;
+  border-radius : 50%;    /* Cercle parfait */
+  padding       : 0;
+
+  /* Style glassmorphism cohérent avec les cards */
+  background            : rgba(255, 255, 255, 0.30);
+  border                : 1px solid rgba(255, 255, 255, 0.50);
+  backdrop-filter       : blur(12px);
+  -webkit-backdrop-filter : blur(12px);
+  box-shadow            : 0 6px 24px rgba(0, 0, 0, 0.12);
+
+  /* Couleur et taille de l'icône */
+  color         : rgba(0, 0, 0, 0.65);
+  font-size     : 1.1rem;
+  line-height   : 1;
+
+  /* Curseur et interactivité */
+  cursor        : pointer;
+
+  /* Transitions pour l'apparition/disparition et le survol */
+  transition    : opacity 0.3s ease,
+                  transform 0.3s ease,
+                  background-color 0.2s ease,
+                  box-shadow 0.2s ease;
+
+  /* Centrage de l'icône Bootstrap Icons */
+  display       : flex;
+  align-items   : center;
+  justify-content : center;
+}
+
+/** Survol : élévation + fond légèrement plus opaque */
+.btt-btn:hover {
+  background : rgba(255, 255, 255, 0.50);
+  box-shadow : 0 10px 32px rgba(0, 0, 0, 0.16);
+  transform  : translateY(-3px);
+}
+
+/** Focus clavier : contour visible pour l'accessibilité */
+.btt-btn:focus-visible {
+  outline        : 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset : 3px;
+}
+
+/** Clic : légère compression pour un effet de "press" */
+.btt-btn:active {
+  transform  : translateY(0) scale(0.93);
+  box-shadow : 0 3px 12px rgba(0, 0, 0, 0.10);
+}
+
+/**
+ * État masqué du bouton.
+ * On utilise opacity + transform (et non display:none) pour que la
+ * transition CSS soit animée (display:none ne peut pas être transitionné).
+ * pointer-events:none empêche les clics quand le bouton est invisible.
+ */
+.btt-hidden {
+  opacity        : 0;
+  transform      : translateY(16px);
+  pointer-events : none;
+}
+
+/** Adaptation mobile : bouton légèrement plus petit et moins éloigné des bords */
+@media (max-width: 576px) {
+  .btt-btn {
+    width  : 42px;
+    height : 42px;
+    bottom : 1.25rem;
+    right  : 1.25rem;
+  }
+}
