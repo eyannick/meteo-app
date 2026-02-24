@@ -27,9 +27,6 @@ Application météo en temps réel utilisant l'API OpenWeatherMap.
 
 ## Auteur
 Yannick ERDMANN
-```
-
----
 
 ## Récapitulatif du flux complet
 ```
@@ -42,3 +39,4 @@ index.html        ──✅ commité──▶ index.html
 styles.css        ──✅ commité──▶ styles.css
 .gitignore        ──✅ commité──▶ .gitignore
 README.md         ──✅ commité──▶ README.md
+```
